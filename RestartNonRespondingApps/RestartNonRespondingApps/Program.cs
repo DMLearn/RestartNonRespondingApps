@@ -3,13 +3,14 @@ using System.Diagnostics;
 
 namespace RestartNonRespondingApps
 {
+
     class Program
     {
 
         static void Main(string[] args)
         {
-            var taskRunnung = new DetectTaskStatus();
-            taskRunnung.Run();
+            var observedTasks = new string[] { "Outlook", "Word" };
+            var taskManager = new TaskManager(observedTasks);
         }
     }
 }
