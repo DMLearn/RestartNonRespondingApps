@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-
+using System.Timers;
 namespace RestartNonRespondingApps
 {
     public class TaskManager
@@ -12,25 +12,64 @@ namespace RestartNonRespondingApps
         {
             notResponding,
             isResponding,
+            isStarted,
             notStarted
         }
-        private Tuple<string, _state>[] _selectedTasks { get; set; }
-        
+
+        private List<Tuple<string, _state, int>> _selectedTasks = new List<Tuple<string, _state, int>> { };
+
         public TaskManager(string[] tasks)
         {
-            for (int j = 0; j < tasks.Length; j++)
+            foreach (string task in tasks)
             {
-                _selectedTasks[j].Item1 = "dasd";
+                var tupleElement = Tuple.Create(task, _state.notStarted, 0);
+                _selectedTasks.Add(tupleElement);
+            }
+        }
+        
+        public void Run()
+        {
+            var timer = new Timer(3000);
+            timer.Elapsed += OnTimerElapsed;
+            timer.Enabled = true;
+        }
+
+        private void OnTimerElapsed(object sender, ElapsedEventArgs e)
+        {
+            CheckTasks();
+        }
+
+        private void CheckTasks()
+        {
+            //int index = 0;
+            foreach (var task in _selectedTasks)
+            {
+                try
+                {
+                    var taskResponding = Process.GetProcessesByName(task.Item1)[0].Responding;
+                    Console.WriteLine(task.Item1 + ": " + taskResponding.ToString());
+                }
+                catch (Exception)
+                {
+                    Console.WriteLine(task.Item1 + ": not started!");
+                }
+                
+
             }
         }
 
+        private void GetStatus(int index)
+        {
+         
+        }
+
+        private void SetStatus(int index)
+        {
+
+        }
     }
-}          
+}
 
-//        public void Start()
-//        {
-
-//        }
 
 //        public void Stop()
 //        {
@@ -56,8 +95,8 @@ namespace RestartNonRespondingApps
 //            }
 //                task.Item2 = Process.GetProcessesByName(task.Item1)[0].Responding;
 
-            
-            
+
+
 //        }
 
 //        private void RestartTask()
