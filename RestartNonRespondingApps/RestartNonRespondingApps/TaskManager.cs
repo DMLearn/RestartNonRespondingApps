@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Timers;
+
 namespace RestartNonRespondingApps
 {
     public class TaskManager
@@ -14,19 +15,13 @@ namespace RestartNonRespondingApps
             notStarted
         }
 
-        /*TODO: After installing C#7.0 use arraylist instead of array or list
-                array needs to be intialized to a fixed size
-                tuples are immutable and therofore cannot be changed durring runtime
-         */
-        private Tuple<string, _state, int>[] _selectedTasks = new Tuple<string, _state, int>[10];
-
+        private readonly List<Tuple<string, _state, int>> _selectedTasks = new List<Tuple<string, _state, int>>();
+        
         public TaskManager(string[] tasks)
         {
-            int index = 0;
-            foreach (string task in tasks)
+            for (int i = 0; i < tasks.Length; i++)
             {                
-                _selectedTasks[0] = Tuple.Create(task, _state.notStarted, 0);
-                index++;
+                _selectedTasks.Insert(i, Tuple.Create(tasks[i], _state.notStarted, 0));
             }
         }
         
@@ -40,15 +35,14 @@ namespace RestartNonRespondingApps
         private void OnTimerElapsed(object sender, ElapsedEventArgs e)
         {
             CheckTasks();
+            Console.WriteLine("Name: {0} \t State: {1} \t Count: {2} \t", _selectedTasks[0].Item1, _selectedTasks[0].Item2, _selectedTasks[0].Item3);
         }
 
         private void CheckTasks()
         {
-            int index = 0;
-            foreach (var task in _selectedTasks)
+            for (int j = 0; j < _selectedTasks.Count; j++)
             {
-                GetTaskStatus(index, task.Item1);
-                index ++;
+                GetTaskStatus(j, _selectedTasks[j].Item1);
             }
         }
 
@@ -56,19 +50,30 @@ namespace RestartNonRespondingApps
         {
             var process = Process.GetProcessesByName(name);
 
-            //if (process.Length > 0)           
-            //{
-            //    if (process[0].Responding == true)
-            //        _selectedTasks[index].Item2 = _state.isResponding;
-            //    else if (process[0].Responding == false)
-            //        _selectedTasks[index].Item2 = _state.notResponding;
-            //}
-            //else
-            //{
-            //    _selectedTasks[index].Item2 = _state.notStarted;                
-            //}
-
+            if (process.Length > 0)
+            {
+                if (process[0].Responding == true)
+                {
+                    var tuple = Tuple.Create(name, _state.isResponding, 0);
+                    _selectedTasks.Insert(index, tuple);     //TODO: move the update of _selectedTask (insert and remove) to seperate method            
+                    _selectedTasks.RemoveAt(index + 1);
+                }
+                else if (process[0].Responding == false)
+                {
+                    var tuple = Tuple.Create(name, _state.notResponding, 0);
+                    _selectedTasks.Insert(index, tuple);
+                    _selectedTasks.RemoveAt(index + 1);
+                }
+            }
+            else
+            {
+                var tuple = Tuple.Create(name, _state.notStarted, 0);
+                _selectedTasks.Insert(index, tuple);
+                _selectedTasks.RemoveAt(index + 1);
+            }
         }
+
+        //TODO: implement action to lower CPU usage. Current assembly uses 12% of total CPU. Target was less then 5% !
 
         private void RestartTask(int index)
         {
