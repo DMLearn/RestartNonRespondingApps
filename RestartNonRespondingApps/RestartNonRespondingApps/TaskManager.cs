@@ -35,7 +35,7 @@ namespace RestartNonRespondingApps
         private void OnTimerElapsed(object sender, ElapsedEventArgs e)
         {
             CheckTasks();
-            Console.WriteLine("Name: {0} \t State: {1} \t Count: {2} \t", _selectedTasks[0].Item1, _selectedTasks[0].Item2, _selectedTasks[0].Item3);
+            Console.WriteLine("{3}\t Name: {0}\t State: {1}\t Count: {2}", _selectedTasks[0].Item1, _selectedTasks[0].Item2, _selectedTasks[0].Item3, DateTime.Now.ToLongTimeString());
         }
 
         private void CheckTasks()

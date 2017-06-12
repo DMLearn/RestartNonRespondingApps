@@ -1,5 +1,5 @@
-﻿using System.Collections.Generic;
-using System.Diagnostics;
+﻿using System.Threading;
+
 
 namespace RestartNonRespondingApps
 {
@@ -12,10 +12,11 @@ namespace RestartNonRespondingApps
             var observedTasks = new string[] { "Outlook" };
             var taskManager = new TaskManager(observedTasks);
             taskManager.Run();
-            
+
             while (true)
             {
-
+                
+                Thread.Sleep(1); // TODO: find better implementaion for Thread.Sleep()
             }
         }
     }
