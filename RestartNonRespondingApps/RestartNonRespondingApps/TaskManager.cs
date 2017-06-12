@@ -38,6 +38,20 @@ namespace RestartNonRespondingApps
             Console.WriteLine("{3}\t Name: {0}\t State: {1}\t Count: {2}", _selectedTasks[0].Item1, _selectedTasks[0].Item2, _selectedTasks[0].Item3, DateTime.Now.ToLongTimeString());
         }
 
+        /// <summary>
+        /// Method checks the states of the selected tasks and saves the values to the field "_selectedTasks".
+        /// Based on the state for each process, different procedures are followed.
+        /// <para>  
+        /// 1) State = isResponding:
+        /// While application is running, no actions are taken due to the normal operation. 
+        /// </para>
+        /// <para>
+        /// 2) State = notResponding:
+        /// Kill application. Set state to "notStarted" and increment counter item3 by one.
+        /// In the next iteration check if application is shutdown and restart process. Incerement item3 by one.
+        /// In the next iteration check if application is aup and running, the set state to "isResponding" and set item3 to zero.
+        /// </para>   
+        /// </summary>
         private void CheckTasks()
         {
             for (int j = 0; j < _selectedTasks.Count; j++)
@@ -51,6 +65,11 @@ namespace RestartNonRespondingApps
             }
         }
 
+        /// <summary>
+        /// Reads the current state of a process.
+        /// </summary>
+        /// <param name="index"></param>
+        /// <param name="name"></param>
         private void GetTaskStatus(int index, string name)
         {
             var process = Process.GetProcessesByName(name);
@@ -75,18 +94,37 @@ namespace RestartNonRespondingApps
             }
         }
 
+        /// <summary>
+        /// Update the field _selectedTasks .
+        /// </summary>
+        /// <param name="tuple"></param>
+        /// <param name="index"></param>
         private void UpdateSelectedList(Tuple<string, _state, int> tuple, int index)
         {
             _selectedTasks.RemoveAt(index);
             _selectedTasks.Insert(index, tuple);
         }
 
+        /// <summary>
+        /// Restart a process after shutdown.
+        /// </summary>
+        /// <param name="index"></param>
+        /// <param name="name"></param>
         private void RestartTask(int index, string name)
         {
             //var process = Process.GetProcessesByName(name);
             //process[0].Kill();
 
             //var tuple = Tuple.Create(name, _state.i, 0);    //TODO: Continue implementation here
+        }
+
+        /// <summary>
+        /// Kill a non responding process. 
+        /// </summary>
+        /// <param name="name"></param>
+        private void ShutdownTask(string name)
+        {
+
         }
     }
 }
