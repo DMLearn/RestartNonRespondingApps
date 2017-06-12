@@ -43,6 +43,11 @@ namespace RestartNonRespondingApps
             for (int j = 0; j < _selectedTasks.Count; j++)
             {
                 GetTaskStatus(j, _selectedTasks[j].Item1);
+
+                //if (_selectedTasks[j].Item2 == _state.notResponding)
+                //{
+                //    RestartTask(j, _selectedTasks[j].Item1);
+                //}
             }
         }
 
@@ -52,32 +57,36 @@ namespace RestartNonRespondingApps
 
             if (process.Length > 0)
             {
-                if (process[0].Responding == true)
+                if (process[0].Responding)
                 {
                     var tuple = Tuple.Create(name, _state.isResponding, 0);
-                    _selectedTasks.Insert(index, tuple);     //TODO: move the update of _selectedTask (insert and remove) to seperate method            
-                    _selectedTasks.RemoveAt(index + 1);
+                    UpdateSelectedList(tuple, index);
                 }
-                else if (process[0].Responding == false)
+                else if (!process[0].Responding)
                 {
                     var tuple = Tuple.Create(name, _state.notResponding, 0);
-                    _selectedTasks.Insert(index, tuple);
-                    _selectedTasks.RemoveAt(index + 1);
+                    UpdateSelectedList(tuple, index);
                 }
             }
             else
             {
                 var tuple = Tuple.Create(name, _state.notStarted, 0);
-                _selectedTasks.Insert(index, tuple);
-                _selectedTasks.RemoveAt(index + 1);
+                UpdateSelectedList(tuple, index);
             }
         }
 
-        //TODO: implement action to lower CPU usage. Current assembly uses 12% of total CPU. Target was less then 5% !
-
-        private void RestartTask(int index)
+        private void UpdateSelectedList(Tuple<string, _state, int> tuple, int index)
         {
+            _selectedTasks.RemoveAt(index);
+            _selectedTasks.Insert(index, tuple);
+        }
 
+        private void RestartTask(int index, string name)
+        {
+            //var process = Process.GetProcessesByName(name);
+            //process[0].Kill();
+
+            //var tuple = Tuple.Create(name, _state.i, 0);    //TODO: Continue implementation here
         }
     }
 }

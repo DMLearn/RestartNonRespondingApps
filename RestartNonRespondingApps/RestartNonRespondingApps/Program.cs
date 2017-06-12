@@ -1,4 +1,5 @@
 ﻿using System.Threading;
+using System.Threading.Tasks;
 
 
 namespace RestartNonRespondingApps
@@ -15,7 +16,6 @@ namespace RestartNonRespondingApps
 
             while (true)
             {
-                
                 Thread.Sleep(1); // TODO: find better implementaion for Thread.Sleep()
             }
         }
