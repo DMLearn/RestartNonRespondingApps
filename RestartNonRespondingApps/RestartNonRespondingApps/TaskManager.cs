@@ -11,17 +11,18 @@ namespace RestartNonRespondingApps
         {
             notResponding,
             isResponding,
-            isStarted,
-            notStarted
+            wasStarted,
+            notStarted,
+            wasShutdown
         }
 
-        private readonly List<Tuple<string, _state, int>> _selectedTasks = new List<Tuple<string, _state, int>>();
+        private readonly List<Tuple<string, _state>> _selectedTasks = new List<Tuple<string, _state>>();
         
         public TaskManager(string[] tasks)
         {
             for (int i = 0; i < tasks.Length; i++)
             {                
-                _selectedTasks.Insert(i, Tuple.Create(tasks[i], _state.notStarted, 0));
+                _selectedTasks.Insert(i, Tuple.Create(tasks[i], _state.notStarted));
             }
         }
         
@@ -35,7 +36,7 @@ namespace RestartNonRespondingApps
         private void OnTimerElapsed(object sender, ElapsedEventArgs e)
         {
             CheckTasks();
-            Console.WriteLine("{3}\t Name: {0}\t State: {1}\t Count: {2}", _selectedTasks[0].Item1, _selectedTasks[0].Item2, _selectedTasks[0].Item3, DateTime.Now.ToLongTimeString());
+            Console.WriteLine("{2}\t Name: {0}\t State: {1}\t ", _selectedTasks[0].Item1, _selectedTasks[0].Item2,  DateTime.Now.ToLongTimeString());
         }
 
         /// <summary>
@@ -56,11 +57,23 @@ namespace RestartNonRespondingApps
         {
             for (int j = 0; j < _selectedTasks.Count; j++)
             {
+                //Read task state and update the field _selectedTasks
                 GetTaskStatus(j, _selectedTasks[j].Item1);
 
-                //if (_selectedTasks[j].Item2 == _state.notResponding)
+                //switch (_selectedTasks[j].Item2)
                 //{
-                //    RestartTask(j, _selectedTasks[j].Item1);
+                //    case _state.notResponding:
+                //        ShutdownTask(_selectedTasks[j].Item1);
+                //        break;
+                //    case _state.wasStarted:
+                //        break;
+                //    case _state.notStarted:
+                //        break;
+                //    case _state.wasShutdown:
+                //        break;
+                //    default:
+                //        //Default case represents => _state.isResponding
+                //        break;
                 //}
             }
         }
@@ -78,18 +91,18 @@ namespace RestartNonRespondingApps
             {
                 if (process[0].Responding)
                 {
-                    var tuple = Tuple.Create(name, _state.isResponding, 0);
+                    var tuple = Tuple.Create(name, _state.isResponding);
                     UpdateSelectedList(tuple, index);
                 }
                 else if (!process[0].Responding)
                 {
-                    var tuple = Tuple.Create(name, _state.notResponding, 0);
+                    var tuple = Tuple.Create(name, _state.notResponding);
                     UpdateSelectedList(tuple, index);
                 }
             }
             else
             {
-                var tuple = Tuple.Create(name, _state.notStarted, 0);
+                var tuple = Tuple.Create(name, _state.notStarted);
                 UpdateSelectedList(tuple, index);
             }
         }
@@ -99,7 +112,7 @@ namespace RestartNonRespondingApps
         /// </summary>
         /// <param name="tuple"></param>
         /// <param name="index"></param>
-        private void UpdateSelectedList(Tuple<string, _state, int> tuple, int index)
+        private void UpdateSelectedList(Tuple<string, _state> tuple, int index)
         {
             _selectedTasks.RemoveAt(index);
             _selectedTasks.Insert(index, tuple);
@@ -110,7 +123,7 @@ namespace RestartNonRespondingApps
         /// </summary>
         /// <param name="index"></param>
         /// <param name="name"></param>
-        private void RestartTask(int index, string name)
+        private void RestartTask(string name)
         {
             //var process = Process.GetProcessesByName(name);
             //process[0].Kill();
