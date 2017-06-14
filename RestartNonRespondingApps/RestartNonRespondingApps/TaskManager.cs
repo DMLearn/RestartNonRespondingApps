@@ -125,10 +125,7 @@ namespace RestartNonRespondingApps
         /// <param name="name"></param>
         private void RestartTask(string name)
         {
-            //var process = Process.GetProcessesByName(name);
-            //process[0].Kill();
-
-            //var tuple = Tuple.Create(name, _state.i, 0);    //TODO: Continue implementation here
+             //TODO: To be implemented
         }
 
         /// <summary>
@@ -137,7 +134,7 @@ namespace RestartNonRespondingApps
         /// <param name="name"></param>
         private void ShutdownTask(string name)
         {
-
+            //TODO: To be implemented
         }
     }
 }
