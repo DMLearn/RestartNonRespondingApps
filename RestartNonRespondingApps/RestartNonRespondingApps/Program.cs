@@ -10,9 +10,11 @@ namespace RestartNonRespondingApps
 
         static void Main(string[] args)
         {
-            var observedTasks = new string[] { "Outlook" };
-            var taskManager = new TaskManager(observedTasks);
-            taskManager.Run();
+            //var observedTasks = new string[] { "Outlook" };
+            //var taskManager = new TaskManager(observedTasks);
+            //taskManager.Run();
+
+            var app = new App();
 
             while (true)
             {
