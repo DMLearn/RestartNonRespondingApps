@@ -14,7 +14,7 @@ namespace RestartNonRespondingApps
             //var taskManager = new TaskManager(observedTasks);
             //taskManager.Run();
 
-            var app = new App();
+            var app = new App("Outlook");
 
             while (true)
             {

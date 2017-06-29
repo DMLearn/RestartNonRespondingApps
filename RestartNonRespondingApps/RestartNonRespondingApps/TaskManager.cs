@@ -125,7 +125,7 @@ namespace RestartNonRespondingApps
         /// <param name="name"></param>
         private void RestartTask(string name)
         {
-             //TODO: To be implemented
+             
         }
 
         /// <summary>
@@ -134,7 +134,7 @@ namespace RestartNonRespondingApps
         /// <param name="name"></param>
         private void ShutdownTask(string name)
         {
-            //TODO: To be implemented
+            
         }
     }
 }
