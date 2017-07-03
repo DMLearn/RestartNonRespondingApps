@@ -10,7 +10,7 @@ namespace RestartNonRespondingApps
 {
     public class App
     {
-        public enum State
+        private enum State
         {
             notRunning,
             Responding,
@@ -19,8 +19,8 @@ namespace RestartNonRespondingApps
             Started,
             ManualMode
         }
-
-        public enum Trigger
+        
+        private enum Trigger
         {
             startedByUser,
             stopedByUser,
@@ -34,7 +34,7 @@ namespace RestartNonRespondingApps
             isNotRunning
         }
 
-        public StateMachine<State, Trigger> _machine { get; }
+        private readonly StateMachine<State, Trigger> _machine;
 
         private System.Timers.Timer _timer = new System.Timers.Timer(2000);
         private readonly string _appName;
@@ -46,11 +46,12 @@ namespace RestartNonRespondingApps
             _machine = new StateMachine<State, Trigger>(_state);
 
             _machine.Configure(State.notRunning)
-                //.InternalTransition(Trigger.isNotRunning, () => { }) //created an empty lambda since it is requiered by the internalTransisition
+                .PermitReentry(Trigger.isNotRunning)
+                //.Permit(Trigger.isNotRunning, State.notRunning)
                 .Permit(Trigger.startedByUser, State.Responding);
 
             _machine.Configure(State.Responding)
-                //.InternalTransition(Trigger.isResponding, () => { }) //created an empty lambda since it is requiered by the internalTransisition
+                .PermitReentry(Trigger.isResponding)
                 .Permit(Trigger.stopedByUser, State.notRunning)
                 .Permit(Trigger.isNotResponding, State.notResponding);
 
@@ -68,6 +69,8 @@ namespace RestartNonRespondingApps
 
             _machine.Configure(State.ManualMode)
                 .Permit(Trigger.isManuallyHandeled, State.notRunning);
+
+            //string graph = _machine.ToDotGraph();
         }
 
         private void UpdateAppState()
