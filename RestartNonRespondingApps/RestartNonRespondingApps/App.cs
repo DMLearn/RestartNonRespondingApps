@@ -1,9 +1,6 @@
-﻿//using System.Threading;
-using System.Timers;
-using System.Threading.Tasks;
+﻿using System.Timers;
 using Stateless;
 using System.Diagnostics;
-using System.Windows.Forms;
 using System;
 
 namespace RestartNonRespondingApps
@@ -77,21 +74,33 @@ namespace RestartNonRespondingApps
             switch (_machine.State)
             {
                 case State.notRunning:
-                    if (state == State.Responding) _machine.Fire(Trigger.startedByUser);
+                    if (state == State.Responding)
+                    {
+                        _machine.Fire(Trigger.startedByUser);
+                        ConsolePrint(ConsoleColor.Green, "läuft.");
+                    }
                     break;
 
                 case State.Responding:
-                    if (state == State.notRunning) _machine.Fire(Trigger.stopedByUser);
-                    else if (state == State.notResponding) _machine.Fire(Trigger.isNotResponding);
+                    if (state == State.notRunning)
+                    {
+                        _machine.Fire(Trigger.stopedByUser);
+                        ConsolePrint(ConsoleColor.Green, "beendet.");
+                    }
+                    else if (state == State.notResponding)
+                    {
+                        _machine.Fire(Trigger.isNotResponding);
+                        ConsolePrint(ConsoleColor.Red, "antwortet nicht.");
+                    }
                     break;
 
                 case State.notResponding:
                     _machine.Fire(Trigger.isKilling);
+                    ConsolePrint(ConsoleColor.Red, "wird beendet."); //TODO: Durch filelogger ersetzen 
                     if (!_timer.Enabled)
                     {
                         KillApp();
                         StartTimmer();
-                        MessageBox.Show(_appName + "gestopt!"); //TODO: Messagebox durch filelogger ersetzen 
                     }
                     break;
 
@@ -101,19 +110,30 @@ namespace RestartNonRespondingApps
                         _machine.Fire(Trigger.isStarting);
                         StartApp();
                         StartTimmer();
-                        MessageBox.Show(_appName + "gestartet!");
+                        ConsolePrint(ConsoleColor.Green, "wird gestartet.");
                     }
-                    else if (!_timer.Enabled) _machine.Fire(Trigger.isNotKilling);
-                    break;
+                    else if (!_timer.Enabled)
+                    {
+                        _machine.Fire(Trigger.isNotKilling);
+                        ConsolePrint(ConsoleColor.Red, "muss manuel durch Nutzer beendet werden!");
+                    }
+                        break;
 
                 case State.Started:
-                    if (!_timer.Enabled && state == State.Responding) _machine.Fire(Trigger.isResponding);
-                    else if (!_timer.Enabled) _machine.Fire(Trigger.isNotStarting);
+                    if (!_timer.Enabled && state == State.Responding)
+                    {
+                        _machine.Fire(Trigger.isResponding);
+                        ConsolePrint(ConsoleColor.Green, "läuft.");
+                    }
+                    else if (!_timer.Enabled)
+                    {
+                        _machine.Fire(Trigger.isNotStarting);
+                        ConsolePrint(ConsoleColor.Red, "muss manuel durch Nutzer gestartet werden..");
+                    }
                     break;
 
                 case State.ManualMode:
-                    _machine.Fire(Trigger.isManuallyHandeled);
-                    MessageBox.Show(_appName + "bitte manuel beenden!");
+                    _machine.Fire(Trigger.isManuallyHandeled);                    
                     break;
             }
         }
@@ -153,5 +173,10 @@ namespace RestartNonRespondingApps
                 
         }
 
+        private void ConsolePrint(ConsoleColor color, string message)
+        {
+            Console.ForegroundColor = color;
+            Console.WriteLine(DateTime.Now.ToLongTimeString() + "\t" + _appName + " " + message);
+        }        
     }
 }
