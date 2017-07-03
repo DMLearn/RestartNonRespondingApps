@@ -1,5 +1,6 @@
 ﻿using System.Threading;
 using System.Threading.Tasks;
+using System.Collections.Generic;
 
 
 namespace RestartNonRespondingApps
@@ -10,15 +11,18 @@ namespace RestartNonRespondingApps
 
         static void Main(string[] args)
         {
-            //var observedTasks = new string[] { "Outlook" };
-            //var taskManager = new TaskManager(observedTasks);
-            //taskManager.Run();
-
-            var app = new App("Outlook");
-
+            List<App> apps = new List<App>();
+            apps.Add(new App("OUTLOOK"));
+            apps.Add(new App("OneCommanderV2"));
+        
             while (true)
             {
-                Thread.Sleep(1); // TODO: find better implementaion for Thread.Sleep()
+                foreach(App app in apps)
+                {
+                    app.UpdateAppState();
+                }
+
+                Thread.Sleep(100); // TODO: find better implementaion for Thread.Sleep()
             }
         }
     }

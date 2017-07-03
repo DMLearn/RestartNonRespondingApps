@@ -19,7 +19,7 @@ namespace RestartNonRespondingApps
             Started,
             ManualMode
         }
-        
+
         private enum Trigger
         {
             startedByUser,
@@ -35,9 +35,9 @@ namespace RestartNonRespondingApps
         }
 
         private readonly StateMachine<State, Trigger> _machine;
-
-        private System.Timers.Timer _timer = new System.Timers.Timer(2000);
+        private readonly System.Timers.Timer _timer = new System.Timers.Timer(2000);
         private readonly string _appName;
+
         private State _state = State.notRunning;
 
         public App(string appName)
@@ -47,7 +47,6 @@ namespace RestartNonRespondingApps
 
             _machine.Configure(State.notRunning)
                 .PermitReentry(Trigger.isNotRunning)
-                //.Permit(Trigger.isNotRunning, State.notRunning)
                 .Permit(Trigger.startedByUser, State.Responding);
 
             _machine.Configure(State.Responding)
@@ -69,11 +68,9 @@ namespace RestartNonRespondingApps
 
             _machine.Configure(State.ManualMode)
                 .Permit(Trigger.isManuallyHandeled, State.notRunning);
-
-            //string graph = _machine.ToDotGraph();
         }
 
-        private void UpdateAppState()
+        public void UpdateAppState()
         {
             var state = GetAppState();
 
@@ -90,33 +87,35 @@ namespace RestartNonRespondingApps
 
                 case State.notResponding:
                     _machine.Fire(Trigger.isKilling);
-                    break;
-
-                case State.Killed:
                     if (!_timer.Enabled)
                     {
                         KillApp();
                         StartTimmer();
+                        MessageBox.Show(_appName + "gestopt!"); //TODO: Messagebox durch filelogger ersetzen 
                     }
-                    else if (state == State.notRunning) _machine.Fire(Trigger.isStarting);
-                    /*TODO : Continue implementing the OnTimerEvent such that it checks
-                           finally after the timer has elapsed whether a correct
-                           app kill was performed
-                           e.g : else if()
-                    */
+                    break;
 
+                case State.Killed:
+                    if (!_timer.Enabled && state == State.notRunning)
+                    {
+                        _machine.Fire(Trigger.isStarting);
+                        StartApp();
+                        StartTimmer();
+                        MessageBox.Show(_appName + "gestartet!");
+                    }
+                    else if (!_timer.Enabled) _machine.Fire(Trigger.isNotKilling);
+                    break;
+
+                case State.Started:
+                    if (!_timer.Enabled && state == State.Responding) _machine.Fire(Trigger.isResponding);
+                    else if (!_timer.Enabled) _machine.Fire(Trigger.isNotStarting);
                     break;
 
                 case State.ManualMode:
+                    _machine.Fire(Trigger.isManuallyHandeled);
                     MessageBox.Show(_appName + "bitte manuel beenden!");
                     break;
-
-                default:
-                    break;
             }
-
-
-
         }
 
         private void StartTimmer()
