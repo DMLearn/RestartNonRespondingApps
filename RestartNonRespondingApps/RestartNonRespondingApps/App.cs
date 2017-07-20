@@ -40,6 +40,7 @@ namespace RestartNonRespondingApps
         public App(string appName)
         {
             _appName = appName;
+            _timer.Elapsed += OnTimerElapsed;
             _machine = new StateMachine<State, Trigger>(_state);
 
             _machine.Configure(State.notRunning)
@@ -95,12 +96,12 @@ namespace RestartNonRespondingApps
                     break;
 
                 case State.notResponding:
-                    _machine.Fire(Trigger.isKilling);
-                    ConsolePrint(ConsoleColor.Red, "wird beendet."); //TODO: Durch filelogger ersetzen 
                     if (!_timer.Enabled)
                     {
+                        _machine.Fire(Trigger.isKilling);
                         KillApp();
                         StartTimmer();
+                        ConsolePrint(ConsoleColor.Red, "wird beendet."); //TODO: Durch filelogger ersetzen 
                     }
                     break;
 
@@ -133,19 +134,20 @@ namespace RestartNonRespondingApps
                     break;
 
                 case State.ManualMode:
-                    _machine.Fire(Trigger.isManuallyHandeled);                    
+                    if (state == State.notRunning) _machine.Fire(Trigger.isManuallyHandeled);
                     break;
             }
         }
 
         private void StartTimmer()
         {
-            _timer.Elapsed += OnTimerElapsed;
             _timer.Enabled = true;
+            _timer.Start();
         }
 
         private void OnTimerElapsed(object sender, ElapsedEventArgs e)
         {
+            _timer.Stop();
             _timer.Enabled = false;
         }
 

@@ -10,10 +10,8 @@ namespace RestartNonRespondingApps
 
         static void Main(string[] args)
         {
-            List<App> apps = new List<App>();
-            apps.Add(new App("OUTLOOK"));
-            apps.Add(new App("OneCommanderV2"));
-        
+            var apps = new[] { new App("OUTLOOK") }; //new App("OneCommanderV2")
+
             while (true)
             {
                 foreach(App app in apps)
